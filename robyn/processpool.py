@@ -5,12 +5,29 @@ import signal
 import sys
 from typing import Dict, List
 from robyn.logger import logger
+import websockets
 
 from robyn.events import Events
 from robyn.robyn import FunctionInfo, Server, SocketHeld
 from robyn.router import GlobalMiddleware, RouteMiddleware, Route
 from robyn.types import Directory, Header
 from robyn.ws import WS
+
+
+def is_port_in_use(port: int) -> bool:
+    async def echo(websocket):
+        async for message in websocket:
+            await websocket.send(message)
+
+    async def main():
+        server = await websockets.serve(echo, "localhost", port)
+        server.close()
+
+    try:
+        asyncio.run(main())
+        return False
+    except OSError:
+        return True
 
 
 def run_processes(

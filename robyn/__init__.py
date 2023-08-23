@@ -13,9 +13,16 @@ from robyn.reloader import setup_reloader
 from robyn.env_populator import load_vars
 from robyn.events import Events
 from robyn.logger import logger
-from robyn.processpool import run_processes
+from robyn.processpool import run_processes, is_port_in_use
 from robyn.responses import serve_file, serve_html
-from robyn.robyn import FunctionInfo, HttpMethod, Request, Response, get_version, jsonify
+from robyn.robyn import (
+    FunctionInfo,
+    HttpMethod,
+    Request,
+    Response,
+    get_version,
+    jsonify,
+)
 from robyn.router import MiddlewareRouter, MiddlewareType, Router, WebSocketRouter
 from robyn.types import Directory, Header
 from robyn import status_codes
@@ -151,7 +158,11 @@ class Robyn:
         url = os.getenv("ROBYN_URL", url)
         port = int(os.getenv("ROBYN_PORT", port))
         open_browser = bool(os.getenv("ROBYN_BROWSER_OPEN", self.config.open_browser))
-
+        while is_port_in_use(port):
+            logger.error(
+                f"Failed to connect because port {port} is in use (or bad host)"
+            )
+            port = int(input("Please Choose Another Port: "))
         logger.info(f"Robyn version: {__version__}")
         logger.info(f"Starting server at {url}:{port}")
 
