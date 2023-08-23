@@ -159,10 +159,16 @@ class Robyn:
         port = int(os.getenv("ROBYN_PORT", port))
         open_browser = bool(os.getenv("ROBYN_BROWSER_OPEN", self.config.open_browser))
         while is_port_in_use(port):
-            logger.error(
-                f"Failed to connect because port {port} is in use (or bad host)"
-            )
-            port = int(input("Please Choose Another Port: "))
+            DEBUG_MODE = os.environ.get("IS_RELOADER_RUNNING")
+            if DEBUG_MODE:
+                logger.error(
+                    f"Failed to connect because port {port} is in use (or bad host)"
+                )
+                port = int(input("Please Choose Another Port: "))
+            else:
+                raise OSError(
+                    f"Failed to connect because port {port} is in use (or bad host)"
+                )
         logger.info(f"Robyn version: {__version__}")
         logger.info(f"Starting server at {url}:{port}")
 
